@@ -1,0 +1,22 @@
+$mapBreakpoints: (
+	portrait: (start: null, end: '449px'),
+	landscape: (start: '450px', end: '599px'),
+	to-tablet: (start: null, end: '599px'),
+	tablet: (start: '600px', end: '1023px'),
+	desktop:(start: '1024px', end: null),
+	from-tablet: (start: '600px', end: null)
+);
+
+$mapVariables: (
+	
+	/*COLORS*/
+	primary-blue: '#28b9d1',
+	primary-brown: '#2b2a28',
+	primary-yellow: '#fde004',
+
+	/*SIZES*/
+	max-width: 1230px,
+
+	/*FONTS*/
+	play: Play,
+);

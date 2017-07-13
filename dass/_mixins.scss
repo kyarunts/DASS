@@ -1,0 +1,127 @@
+$default-breakpoint: root;
+$current-breakpoint: $default-breakpoint;
+
+$placeholders: ();
+
+@mixin breakpoint($breakpoint) {
+	$value: map-get($mapBreakpoints, $breakpoint);
+	@if $value != null {
+		$current-breakpoint: $breakpoint !global;
+		$start: map-get($value, start);
+		$end: map-get($value, end);
+
+		@if $start == null {
+			@media (max-width: $end) {
+				@content;
+			}
+		}
+
+		@else if $end == null {
+			@media (min-width: $start) {
+				@content;
+			}
+		}
+
+		@else {
+			@media (min-width: $start) and (max-width: $end) {
+				@content
+			}
+		}
+		$current-breakpoint: $default-breakpoint !global;
+	}
+
+	@else {
+		@warn "Invalid breakpoint `#{$breakpoint}`."
+	}
+}
+
+@mixin placeholder($name) {
+	@if not index($placeholders, $name) {
+		$placeholders: append($placeholders, $name) !global;
+
+		@at-root {
+			@each $breakpoint, $values in $mapBreakpoints {
+				@include breakpoint($breakpoint) {
+					$class: #{$name}-#{$breakpoint};
+					%#{$class} {
+						@content;
+					}
+				}
+			}
+	      	%#{$name}-#{$default-breakpoint} {
+	        	@content;
+	      	}
+		}
+	}
+
+	@else {
+		@warn "Placeholder `#{$name}` already exists.";
+	}
+}
+
+@mixin _($rule, $value) {
+	$finalValue: '';
+	$className: format-class-name(#{$rule}-#{str-replace(#{$value}, ' ', '-')});
+
+	@if type-of($value) == list {
+		@each $item in $value {
+			@if $finalValue == '' {
+				$finalValue: $finalValue + getValue($item);
+			}
+			@else {
+				$finalValue: $finalValue + ' ' + getValue($item);
+			}
+		}		
+	}
+
+	@else {
+		$finalValue: getValue($value);
+	}
+
+	@if not index($placeholders, $className) {
+		@include placeholder($className) {
+			#{$rule}: #{$finalValue};
+		}
+	}
+
+	@extend %#{$className}-#{$current-breakpoint};
+}
+
+@function getValue($value) {
+	$finalValue: $value;
+	$existance: index(map-keys($mapVariables), $value);
+
+	@if $existance != null {
+		$finalValue: map-get($mapVariables, $value);
+	}
+
+	@return $finalValue;
+}
+
+@function format-class-name($className) {
+	$name: $className;
+	$chars: ('(', ')', '/', '`', '~', '&', '?');
+
+	@each $char in $chars {
+		@while str-index($name, $char) != null {
+			@if (str-index($name, $char) < str-length($name)) {
+				$name: str-replace($name, $char, '-');
+			}
+			@else {
+				$name: str-replace($name, $char, '');
+			}
+		}
+	}
+
+	@return $name;
+}
+
+@function str-replace($string, $search, $replace: '') {
+  $index: str-index(#{$string}, $search);
+
+  @if $index {
+    @return str-slice($string, 1, $index - 1) + $replace + str-replace(str-slice($string, $index + str-length($search)), $search, $replace);
+  }
+
+  @return $string;
+}

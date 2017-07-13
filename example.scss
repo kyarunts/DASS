@@ -1,0 +1,7 @@
+@import '/dass/imports';
+
+.sample-class {
+	@include _(color, primary-yellow);
+	@include _(padding-bottom, 20vh);
+	@include _(background: url(https://goo.gl/TvQgvN));
+}
